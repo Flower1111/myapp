@@ -1,7 +1,9 @@
 <template>
   <div class="view">
     <h1>My cats</h1>
-      <img :src="image.url" contain>
+      <div v-for="image in images" xs4 d-flex v-bind:key="image">{{image[""]}}
+        <img :src="image.url" contain>
+    </div>
   </div>
 </template>
 
@@ -10,18 +12,25 @@ import axios from 'axios'
 export default {
   name: 'ViewView',
   data () {
-    return {image: { url: ""}}
+    return {
+      images: [],
+      limit: 20,
+      }
   },
   created(){
+    axios.defaults.headers.common['x-api-key'] = "DEMO-API-KEY";
     this.loadImages();
-  } ,
+  },
   methods:{
     async loadImages()
     {
       try{
-        axios.defaults.headers.common['x-api-key'] = "DEMO-API-KEY"
-        let response = await axios.get('https://api.thecatapi.com/v1/images')
-        this.image = response.data[0]
+          let query_params = {
+          limit: this.limit
+          };
+          let response = await axios.get('https://api.thecatapi.com/v1/images', 
+          { params: query_params });
+          this.images = response.data
       }catch(err){
         console.log(err)
       }

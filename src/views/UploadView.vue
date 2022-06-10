@@ -1,12 +1,12 @@
 <template>
   <div class="upload">
-    <h1>This is an upload page</h1>
-    <input 
-     style="display: none"
-     type="file"
-     @change="onFileSelected"
-     ref="fileInput">
-    <button @click="$refs.fileInput.click()">Pick File</button>
+    <h1>Upload image:</h1>
+      <div v-if="message"
+        :class="`message ${error ? 'is-danger' : 'is-success'}`"
+      >
+      <div class="message-body">{{ message }}</div>
+      </div>
+    <input  type="file" @change="onFileSelected">
     <button @click="onUpload">Upload</button>
   </div>
 </template>
@@ -18,21 +18,32 @@ export default {
   name: 'UploadView',
   data () {
     return {
-      selectedFile: null
+      selectedFile: null,
+      message: "",
+      error: false
   }
 }, 
   methods: {
     onFileSelected(event) {
-      this.selectedFile = event.target.files[0]
+      this.selectedFile = event.target.files[0];
+      this.error = false;
+      this.message = "";
     },
-    onUpload() {
-      axios.defaults.headers.common['x-api-key'] = "DEMO-API-KEY"
+    async onUpload() {
+      axios.defaults.headers.common['x-api-key'] = "DEMO-API-KEY";
       let formData = new FormData();
-      formData.append('file', this.selectedFile, this.selectedFile.name)
-      axios.post('https://api.thecatapi.com/v1/images/upload',
-          formData, {headers: {'Content-Type':'multipart/form-data' }})
-      .then(res => {console.log(res)}).catch(err => {console.log(err)})
-    },
+      formData.append('file', this.selectedFile);
+      try {
+          await axios.post('https://api.thecatapi.com/v1/images/upload',
+          formData, {headers: {'Content-Type':'multipart/form-data' }});
+          this.message = "File has been uploaded!";
+          this.selectedFile = "";
+          this.error = false;
+      } catch(err) {
+        this.message = "Something went wrong.";
+        this.error = true;
+      }
+    }
   }
 }
 </script>

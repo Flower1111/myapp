@@ -1,8 +1,9 @@
 <template>
   <div class="home">
-    <button @click="loadNextImage">Load next image</button>
-    <br/>
-    <img :src="image.url" contain>
+    <button @click="loadNextImage">Show more cats</button>
+    <div v-for="image in images" xs4 d-flex v-bind:key="image">{{image[""]}}
+        <img :src="image.url" contain> 
+    </div>
   </div>
 </template>
 
@@ -11,21 +12,25 @@ import axios from 'axios'
 export default {
   name: 'HomeView',
   data () {
-    return {image: { url: ""}}
+    return {
+      images: [],
+      limit: 5,
+      }
   },
   created(){
+    axios.defaults.headers.common['x-api-key'] = "DEMO-API-KEY";
     this.loadNextImage();
   },
   methods:{
     async loadNextImage()
     {
       try{
-        axios.defaults.headers.common['x-api-key'] = "DEMO-API-KEY"
-        let response = await axios.get('https://api.thecatapi.com/v1/images/search',
-            { params: { limit:1, size:"full" } } )
-        this.image = response.data[0]
-        console.log("Image id:", this.image.id)
-        console.log("Image url:", this.image.url)
+          let query_params = {
+          limit: this.limit
+          };
+          let response = await axios.get('https://api.thecatapi.com/v1/images/search', 
+          { params: query_params } );
+          this.images = response.data;
       }catch(err){
         console.log(err)
       }
